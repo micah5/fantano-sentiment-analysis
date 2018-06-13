@@ -28,6 +28,7 @@ def tokens_to_string(tokens):
 #step 0: dataset
 with open('results.json') as json_data:
     data = json.load(json_data)
+random.shuffle(data)
 x, y = [], []
 for obj in data:
     x.append(obj['x']) # text of review
