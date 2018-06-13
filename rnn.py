@@ -14,6 +14,7 @@ import json
 from numpy import array
 from numpy import argmax
 from keras.utils import to_categorical
+import random
 
 #np.set_printoptions(threshold='nan')
 
@@ -30,7 +31,8 @@ with open('results.json') as json_data:
 x, y = [], []
 for obj in data:
     x.append(obj['x']) # text of review
-    y.append(obj['y']) # score 1-9
+    #y.append(float(random.randint(0,10)/10.0))#(obj['y']-0.0)/(10.0-0.0)) # score 0-10, normalized
+    y.append(float((obj['y']-0.0)/(10.0-0.0))) # score 0-10, normalized
 
 #step 1: vocabulary
 num_words = 1000
@@ -46,7 +48,9 @@ idx = tokenizer.word_index
 inverse_map = dict(zip(idx.values(), idx.keys()))
 
 # one hot encode target
-y_encoded = to_categorical(y)
+#y_encoded = to_categorical(y)
+print y
+y_encoded = y
 
 #step 2: embedding
 embedding = Embedding(input_dim=num_words,
@@ -57,16 +61,17 @@ embedding = Embedding(input_dim=num_words,
 #step 3: rnn
 model = Sequential()
 model.add(embedding)
-model.add(GRU(units=32, return_sequences=True))
-model.add(GRU(units=16))
-model.add(Dense(10, activation='softmax'))
-optimizer = SGD(lr=0.01)
-model.compile(loss='categorical_crossentropy',
+model.add(GRU(units=16, return_sequences=True))
+model.add(GRU(units=8, return_sequences=True))
+model.add(GRU(units=4))
+model.add(Dense(1, activation='sigmoid'))
+optimizer = Adam(lr=1e-3)
+model.compile(loss='binary_crossentropy',
               optimizer=optimizer,
               metrics=['accuracy'])
 model.summary()
 model.fit(x_pad, y_encoded,
-          validation_split=0.05, epochs=5, batch_size=64)
+          validation_split=0.05, epochs=200, batch_size=64)
 
 #step 5: save
 model.save('model.keras')
