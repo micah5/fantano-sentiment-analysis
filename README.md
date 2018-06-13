@@ -14,10 +14,6 @@ python rnn.py
 
 Keras, Tensorflow
 
-```
-Give examples
-```
-
 ### Performance
 
 Poor. The dataset is too small.
